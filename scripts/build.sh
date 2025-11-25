@@ -85,14 +85,22 @@ print_info "Using $NUM_JOBS parallel jobs for build"
 # Change to third_party directory
 cd "$THIRD_PARTY_DIR"
 
-# Run make with selected targets
+# Run make with selected targets using sudo if necessary
 print_section "Building Micro-benchmarks"
 print_info "This may take 30-60 minutes. Progress will be shown below...\n"
 
 if make $BUILD_TARGETS -j${NUM_JOBS} 2>&1; then
-    print_section "Build Completed Successfully"
-    
-    # Verify binaries were created
+    # Try to install as regular user first, use sudo if needed
+    if sudo make $BUILD_TARGETS install -j${NUM_JOBS} 2>&1; then
+        print_section "Build Completed Successfully"
+    else
+        print_error "Installation step failed with sudo. Check permissions."
+        exit 1
+    fi
+else
+    print_error "Build failed. Please check the error messages above."
+    exit 1
+fi
     print_info "Verifying built binaries..."
     BINARIES=(
         "/usr/local/bin/cutlass_profiler"
@@ -100,7 +108,7 @@ if make $BUILD_TARGETS -j${NUM_JOBS} 2>&1; then
         "/usr/local/bin/all_gather_perf_mpi"
         "/usr/local/bin/all_reduce_perf_mpi"
     )
-    
+
     FOUND_COUNT=0
     for BINARY in "${BINARIES[@]}"; do
         if [ -f "$BINARY" ]; then
@@ -110,21 +118,21 @@ if make $BUILD_TARGETS -j${NUM_JOBS} 2>&1; then
             print_warn "✗ Not found: $BINARY"
         fi
     done
-    
+
     print_info "\nBuilt $FOUND_COUNT/${#BINARIES[@]} expected binaries"
-    
+
     # Show installation location
     print_section "Build Summary"
     print_info "Binaries installed to: /usr/local/bin/"
     print_info "Libraries installed to: /usr/local/lib/"
-    
+
     print_info ""
     print_info "You can now run SuperBench benchmarks with:"
     print_info "  cd $PROJECT_ROOT"
     print_info "  source venv/bin/activate"
     print_info "  sb run -c scripts/misc/gb300-single-node.yaml -f scripts/misc/local.ini --no-docker"
     print_info ""
-    
+
 else
     print_error "Build failed. Please check the error messages above."
     exit 1
