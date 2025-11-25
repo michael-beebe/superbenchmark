@@ -9,8 +9,8 @@ superbench:
   var:
     common_model_config: &common_model_config
       duration: 0
-      num_warmup: 2
-      num_steps: 10
+      num_warmup: 1
+      num_steps: 5
       batch_size: 32
       precision:
         - float32
@@ -18,7 +18,7 @@ superbench:
         - train
 
   benchmarks:
-    # GPU Computation - GEMM (General Matrix Multiply)
+    # GPU Computation - GEMM using CUTLASS profiler
     gemm-flops:
       enable: true
       modes:
@@ -29,23 +29,10 @@ superbench:
         precision:
           - fp32
           - fp16
-        duration: 10
-        n: 8192
-        m: 8192
-        k: 8192
-
-    # NCCL Bandwidth (GPU communication)
-    nccl-bw:
-      enable: true
-      modes:
-        - name: local
-          proc_num: 4
-          parallel: yes
-      parameters:
-        operation: allreduce
-        minbytes: 1
-        maxbytes: 1G
-        ngpus: 1
+        duration: 5
+        n: 4096
+        m: 4096
+        k: 4096
 
     # Simple PyTorch benchmark - ResNet50
     pytorch-resnet50:
@@ -59,6 +46,22 @@ superbench:
         batch_size: 64
         duration: 0
         num_warmup: 1
-        num_steps: 5
+        num_steps: 3
+
+    # Simple PyTorch benchmark - BERT
+    pytorch-bert:
+      enable: true
+      modes:
+        - name: local
+          proc_num: 1
+          parallel: no
+      parameters:
+        <<: *common_model_config
+        batch_size: 16
+        duration: 0
+        num_warmup: 1
+        num_steps: 3
+        model_name: bert-base-uncased
+
 
 
