@@ -48,8 +48,8 @@ superbench:
         num_warmup: 1
         num_steps: 3
 
-    # Simple PyTorch benchmark - BERT
-    pytorch-bert:
+    # Simple PyTorch benchmark - BERT Base
+    pytorch-bert-base:
       enable: true
       modes:
         - name: local
@@ -61,7 +61,6 @@ superbench:
         duration: 0
         num_warmup: 1
         num_steps: 3
-        model_name: bert-base-uncased
 
 
 
