@@ -37,7 +37,8 @@ py3nvml>=0.2.6
 
 # ONNX Runtime support
 onnx>=1.10.2
-onnxruntime-gpu>=1.12.0
+# onnxruntime-gpu is x86_64 only, use onnxruntime for ARM64
+onnxruntime>=1.12.0
 
 # Development and testing (optional, uncomment if needed)
 # pytest>=6.2.2
